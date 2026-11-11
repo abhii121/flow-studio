@@ -5,16 +5,31 @@
       role="img"
       [attr.aria-label]="'Generative flow-field artwork, seed ' + params().seed"
     ></canvas>
+    <canvas #overlay class="overlay" [class.active]="drawMode()" aria-hidden="true"></canvas>
 
     <header class="brand">
       <h1>FLOW STUDIO</h1>
       <p>Generative art, drawn live in your browser</p>
     </header>
 
-    <a class="back" href="https://abisheksomanportfolio.netlify.app" target="_blank" rel="noopener noreferrer">← Portfolio</a>
+    <div class="tools">
+      <button
+        type="button"
+        class="pill draw-toggle"
+        [class.on]="drawMode()"
+        [attr.aria-pressed]="drawMode()"
+        (click)="toggleDraw()"
+      >✎ {{ drawMode() ? 'Drawing on' : 'Draw' }}</button>
+      <a class="pill" href="https://abisheksomanportfolio.netlify.app" target="_blank" rel="noopener noreferrer">← Portfolio</a>
+    </div>
+
+    @if (drawMode() && strokes().length === 0 && !drawing() && !sketching()) {
+      <div class="hint" aria-hidden="true">Draw anywhere on the canvas and watch the particles react</div>
+    }
 
     <div class="seed" aria-live="polite">
       SEED {{ params().seed }}
+      @if (strokes().length > 0) { <span class="muted">· {{ strokes().length }} {{ strokes().length === 1 ? 'stroke' : 'strokes' }}</span> }
       @if (drawing()) { <span class="status">· drawing…</span> }
     </div>
 
@@ -33,7 +48,7 @@
       </div>
     </div>
 
-    @for (s of sliders; track s.key) {
+    @for (s of sliders.slice(0, 3); track s.key) {
       <div class="field">
         <label class="label" [for]="'slider-' + s.key">
           {{ s.label }}
@@ -82,12 +97,54 @@
       </div>
     </div>
 
+    <section class="draw-card" aria-labelledby="draw-title">
+      <h3 id="draw-title">✎ Your drawing</h3>
+      <p class="note">Sketch on the canvas and your lines reshape the flow.</p>
+
+      <div class="field">
+        <span class="label" id="brush-label">Brush behaviour</span>
+        <div class="segmented" role="group" aria-labelledby="brush-label">
+          @for (b of brushOptions; track b.mode) {
+            <button
+              type="button"
+              [class.on]="params().brush === b.mode"
+              [attr.aria-pressed]="params().brush === b.mode"
+              (click)="setBrush(b.mode)"
+            >{{ b.label }}</button>
+          }
+        </div>
+        <p class="note brush-hint">{{ brushHint() }}</p>
+      </div>
+
+      <div class="field">
+        <label class="label" for="slider-radius">
+          {{ sliders[3].label }}
+          <span>{{ sliders[3].format(params().radius) }}</span>
+        </label>
+        <input
+          type="range"
+          id="slider-radius"
+          [min]="sliders[3].min"
+          [max]="sliders[3].max"
+          [step]="sliders[3].step"
+          [value]="params().radius"
+          (input)="setSlider('radius', $event)"
+        />
+      </div>
+
+      <div class="mini-actions">
+        <button type="button" class="btn mini" [disabled]="strokes().length === 0" (click)="undoStroke()">Undo</button>
+        <button type="button" class="btn mini" [disabled]="strokes().length === 0" (click)="clearStrokes()">Clear</button>
+        <button type="button" class="btn mini" (click)="addSurpriseStroke()">Surprise me</button>
+      </div>
+    </section>
+
     <div class="actions">
       <button type="button" class="btn" (click)="randomize()">Randomize</button>
       <button type="button" class="btn" (click)="copyLink()">{{ linkCopied() ? 'Link copied' : 'Copy link' }}</button>
       <button type="button" class="btn primary" (click)="savePng()">Save PNG</button>
     </div>
 
-    <p class="note">The same seed always draws the same picture, so a shared link reproduces your exact artwork.</p>
+    <p class="note">The same seed always draws the same picture, so a shared link reproduces your settings. Hand-drawn lines stay in your browser.</p>
   </aside>
 </div>

@@ -44,10 +44,27 @@ canvas {
   text-shadow: 0 1px 8px #000;
 }
 
-.back {
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.overlay.active {
+  pointer-events: auto;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.tools {
   position: absolute;
   right: 20px;
-  top: 22px;
+  top: 20px;
+  display: flex;
+  gap: 8px;
+}
+
+.pill {
   padding: 7px 14px;
   border-radius: 999px;
   font-size: 13px;
@@ -56,14 +73,45 @@ canvas {
   background: rgba(13, 17, 23, 0.65);
   border: 1px solid rgba(139, 148, 158, 0.3);
   backdrop-filter: blur(6px);
-  transition: border-color 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
 }
 
-.back:hover,
-.back:focus-visible {
+.pill:hover,
+.pill:focus-visible {
   color: #4ce0b3;
   border-color: #4ce0b3;
   outline: none;
+}
+
+.pill.on {
+  color: #06251c;
+  background: #4ce0b3;
+  border-color: #4ce0b3;
+}
+
+.hint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  color: #e6edf3;
+  background: rgba(13, 17, 23, 0.7);
+  border: 1px dashed rgba(76, 224, 179, 0.6);
+  pointer-events: none;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+.muted {
+  color: #9aa7b5;
 }
 
 .seed {
@@ -238,6 +286,46 @@ input[type='range']:focus-visible {
   color: #6f7c8b;
 }
 
+.draw-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(76, 224, 179, 0.25);
+  background: rgba(76, 224, 179, 0.04);
+}
+
+.draw-card h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #4ce0b3;
+}
+
+.brush-hint {
+  margin-top: 8px;
+  color: #9aa7b5;
+}
+
+.mini-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn.mini {
+  padding: 9px 0;
+  font-size: 12px;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn:disabled:hover {
+  border-color: rgba(139, 148, 158, 0.3);
+}
+
 @media (max-width: 820px) {
   .app {
     flex-direction: column;
@@ -258,9 +346,11 @@ input[type='range']:focus-visible {
   }
 
   .brand { left: 16px; top: 16px; }
-  .back { right: 12px; top: 14px; }
+  .tools { right: 12px; top: 14px; }
+  .brand p { max-width: 55%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .progress span { animation: none; width: 100%; }
+  .hint { animation: none; }
 }
